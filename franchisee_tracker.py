@@ -27,10 +27,10 @@ if 'submitted' not in st.session_state:
 # Only download if file doesn't exist
 if not os.path.exists('florida_with_sentiment.csv'):
     url = 'https://drive.google.com/file/d/1oOR6oVkmkU8LQQXnDWUjvCpp0GmKjhCB/view?usp=sharing'
-    gdown.download(url, 'florida_with_sentiment.csv', quiet=False)
+    gdown.download(url, 'florida_with_sentiment.csv', quiet=False, fuzzy=True)
 
 # Load as usual
-df = pd.read_csv('florida_with_sentiment.csv')
+df = pd.read_csv("florida_with_sentiment.csv", low_memory=False, encoding="utf-8")
 
                     
 # Filter data based on city and category
