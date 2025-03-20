@@ -20,7 +20,7 @@ if 'submitted' not in st.session_state:
     st.session_state.submitted = False
 
 # Use the correct URL format for direct download and add fuzzy option
-url = 'https://drive.google.com/file/d/1oOR6oVkmkU8LQQXnDWUjvCpp0GmKjhCB/view?usp=sharing'
+url = 'https://drive.google.com/file/d/19--OchS3YYdL6pvlkWPou3lc2fDzBiGl/view?usp=sharing'
 
 # Only download if file doesn't exist or is too small
 file_path = 'florida_with_sentiment.csv'
@@ -40,62 +40,6 @@ if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
 else:
     print(f"File download failed or file is empty")
 
-# Only download if file doesn't exist
-if not os.path.exists('florida_with_sentiment.csv'):
-    url = 'https://drive.google.com/file/d/1oOR6oVkmkU8LQQXnDWUjvCpp0GmKjhCB/view?usp=sharing'
-    gdown.download(url, 'florida_with_sentiment.csv', quiet=False, fuzzy=True)
-
-# Load as usual
-# Try reading the CSV with reduced memory usage
-def reduce_mem_usage(df):
-    start_mem = df.memory_usage().sum() / 1024**2
-    print('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
-    
-    for col in df.columns:
-        col_type = df[col].dtype
-        
-        if col_type != object:
-            c_min = df[col].min()
-            c_max = df[col].max()
-            if str(col_type)[:3] == 'int':
-                if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
-                    df[col] = df[col].astype(np.int8)
-                elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
-                    df[col] = df[col].astype(np.int16)
-                elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
-                    df[col] = df[col].astype(np.int32)
-                elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
-                    df[col] = df[col].astype(np.int64)  
-            else:
-                if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
-                    df[col] = df[col].astype(np.float16)
-                elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
-                    df[col] = df[col].astype(np.float32)
-                else:
-                    df[col] = df[col].astype(np.float64)
-        else:
-            df[col] = df[col].astype('category')
-
-    end_mem = df.memory_usage().sum() / 1024**2
-    print('Memory usage after optimization is: {:.2f} MB'.format(end_mem))
-    print('Decreased by {:.1f}%'.format(100 * (start_mem - end_mem) / start_mem))
-    
-    return df
-
-# Load the CSV with optimized memory usage
-try:
-    # First read column names only
-    cols = pd.read_csv('florida_with_sentiment.csv', nrows=0).columns.tolist()
-    
-    # Then read only necessary columns
-    needed_cols = ['business_id', 'name', 'address', 'city', 'state', 'postal_code', 
-                  'latitude', 'longitude', 'categories', 'sentiment']
-    usecols = [col for col in needed_cols if col in cols]
-    
-    df = pd.read_csv('florida_with_sentiment.csv', usecols=usecols)
-    df = reduce_mem_usage(df)
-except Exception as e:
-    st.error(f"Error loading data: {e}")
                     
 # Filter data based on city and category
 def filter_data(city, category, business_name=None):
@@ -112,14 +56,6 @@ def sentiment_analysis(reviews):
         sentiment = blob.sentiment.polarity
         sentiments.append(sentiment)
     return sentiments
-
-# Function to format postal code
-def format_postal_code(postal_code):
-    try:
-        # Convert to integer first to remove decimals
-        return str(int(float(postal_code)))
-    except (ValueError, TypeError):
-        return str(postal_code)
 
 # Callback function when submit button is clicked
 def on_submit():
@@ -168,9 +104,6 @@ if st.session_state.submitted:
             # Display filtered businesses
             st.success(f"Found {len(filtered_data)} businesses in {st.session_state.city} under the category '{st.session_state.category}'.")
             st.write("Now analyzing customer sentiment for these businesses...")
-
-            # Format postal codes in the filtered data
-            filtered_data['postal_code'] = filtered_data['postal_code'].apply(format_postal_code) 
 
             # Count how many locations each business has by unique business_id
             business_counts = filtered_data.drop_duplicates('business_id').groupby('name').size().reset_index(name='franchisee_count')
@@ -276,7 +209,7 @@ if st.session_state.submitted:
                         lat = row['latitude']
                         lon = row['longitude']
                         sentiment = row['sentiment']
-                        postal_code = row['postal_code']
+                        address = row['address']
                         
                         # Color based on sentiment (positive: green, negative: red, neutral: gray)
                         if sentiment > 0:
@@ -294,7 +227,7 @@ if st.session_state.submitted:
                             fill=True,
                             fill_color=color,
                             fill_opacity=0.7,
-                            popup=f"{selected_business} ({postal_code}): Sentiment: {sentiment:.2f}"
+                            popup=f"{selected_business} ({address}): Sentiment: {sentiment:.2f}"
                         ).add_to(business_marker_cluster)
                     
                     # Render the business-specific map in Streamlit
