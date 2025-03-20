@@ -18,11 +18,26 @@ if 'business_name' not in st.session_state:
 if 'submitted' not in st.session_state:
     st.session_state.submitted = False
 
-# Load the cleaned data
-#df = pd.read_csv('florida_with_sentiment.csv')
-# Example: Load file from Google Drive
-#url = "https://drive.google.com/file/d/1oOR6oVkmkU8LQQXnDWUjvCpp0GmKjhCB/view?usp=sharing"
-#df = pd.read_csv(url)
+# Use the correct URL format for direct download and add fuzzy option
+url = 'https://drive.google.com/file/d/1oOR6oVkmkU8LQQXnDWUjvCpp0GmKjhCB/view?usp=sharing'
+
+# Only download if file doesn't exist or is too small
+file_path = 'florida_with_sentiment.csv'
+if not os.path.exists(file_path) or os.path.getsize(file_path) < 1000000:  # Less than 1MB
+    # Use fuzzy=True to handle Google Drive sharing links
+    gdown.download(url, file_path, quiet=False, fuzzy=True)
+
+# Check if the file exists and has content before loading
+if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+    # Now read the CSV
+    try:
+        df = pd.read_csv(file_path)
+        print(f"Successfully loaded CSV with {len(df)} rows and {len(df.columns)} columns")
+    except Exception as e:
+        print(f"Error reading CSV: {e}")
+        # You might want to add a fallback here
+else:
+    print(f"File download failed or file is empty")
 
 # Only download if file doesn't exist
 if not os.path.exists('florida_with_sentiment.csv'):
