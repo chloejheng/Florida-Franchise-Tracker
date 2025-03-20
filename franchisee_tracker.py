@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import folium
 from folium.plugins import MarkerCluster
+import gdown
+import os
 
 # Initialize session state variables if they don't exist
 if 'city' not in st.session_state:
@@ -17,7 +19,19 @@ if 'submitted' not in st.session_state:
     st.session_state.submitted = False
 
 # Load the cleaned data
+#df = pd.read_csv('florida_with_sentiment.csv')
+# Example: Load file from Google Drive
+#url = "https://drive.google.com/file/d/1oOR6oVkmkU8LQQXnDWUjvCpp0GmKjhCB/view?usp=sharing"
+#df = pd.read_csv(url)
+
+# Only download if file doesn't exist
+if not os.path.exists('florida_with_sentiment.csv'):
+    url = 'https://drive.google.com/file/d/1oOR6oVkmkU8LQQXnDWUjvCpp0GmKjhCB/view?usp=sharing'
+    gdown.download(url, 'florida_with_sentiment.csv', quiet=False)
+
+# Load as usual
 df = pd.read_csv('florida_with_sentiment.csv')
+
                     
 # Filter data based on city and category
 def filter_data(city, category, business_name=None):
