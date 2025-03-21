@@ -66,6 +66,12 @@ def on_submit():
 # Streamlit UI components
 st.title("Florida Franchisee Tracker")
 st.write("""
+Hi, I am Pei-Yu Jheng :wave:
+
+A Northeastern University's master student studied in Data Analytics and concentrated in Applied Machine Intelligence.""")
+st.markdown("[Linkedin](www.linkedin.com/in/pei-yu-jheng-a2462923b)")
+
+st.write("""
 This app helps you analyze customer sentiment across different franchisee locations in Florida.
 
 According to the guidantfinancial.com, the top four trending states that small businesses going franchise are Texas, California, Florida, and Georgia. Therefore, We choose Florida to analyze customers' feedback on thoes franchisees.
