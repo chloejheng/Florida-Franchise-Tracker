@@ -20,7 +20,7 @@ if 'submitted' not in st.session_state:
     st.session_state.submitted = False
 
 # Use the correct URL format for direct download and add fuzzy option
-url = 'https://drive.google.com/file/d/1EdwT6w6cVee4EUeQE-BWqLAAo2Oquv45/view?usp=sharing'
+url = 'https://drive.google.com/file/d/16L_xOmMCQA3rcFGNI0B7E2OIRPXCzlJt/view?usp=sharing'
 
 # Only download if file doesn't exist or is too small
 file_path = 'florida_with_sentiment.csv'
