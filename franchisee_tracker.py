@@ -9,7 +9,7 @@ from folium.plugins import MarkerCluster
 import gdown
 import os
 
-st.set_page_config(page_title="Franchisee Tracker", page_icon=":😊🔍📊:")
+st.set_page_config(page_title="Franchisee Tracker", page_icon=":🔍:")
 
 # Initialize session state variables if they don't exist
 if 'city' not in st.session_state:
