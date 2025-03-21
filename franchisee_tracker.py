@@ -175,18 +175,17 @@ if st.session_state.submitted:
                     # Create a mapping from business_id to address for display purposes
                     id_to_address = dict(zip(selected_business_data['business_id'], selected_business_data['address']))
                     
-                    # Add an "All Locations" option
-                    location_options = ["All Locations"]
-                    
-                    # Add the addresses corresponding to each business_id
+                    # Add the addresses corresponding to each business_id (WITHOUT "All Locations" option)
                     location_addresses = [id_to_address.get(bid, "Unknown Address") for bid in unique_business_ids]
-                    location_options.extend(location_addresses)
                     
                     # Initialize session state for selected address if it doesn't exist
                     if 'selected_address' not in st.session_state:
-                        st.session_state.selected_address = "All Locations"
+                        st.session_state.selected_address = location_addresses[0] if location_addresses else ""
+                    # If the previously selected address was "All Locations", default to the first specific location
+                    elif st.session_state.selected_address == "All Locations" and location_addresses:
+                        st.session_state.selected_address = location_addresses[0]
 
-                                        # Create a map for just the selected business
+                    # Create a map for just the selected business
                     st.write("""
                     #### Location Map
                     This map shows all locations for your selected business. Color indicates the sentiment at each location.
@@ -233,72 +232,55 @@ if st.session_state.submitted:
                     # Render the business-specific map in Streamlit
                     st.components.v1.html(business_map._repr_html_(), height=600)
                     
-                    # Dropdown to select specific location by address
+                    # Dropdown to select specific location by address (WITHOUT "All Locations" option)
                     st.subheader("Step 4: Location-Specific Analysis")
                     st.write("""
                     You can analyze sentiment for a specific location by selecting its address below.
                     
-                    Choose "All Locations" to see charts for each location side by side.
-                    
-                    Choose specific location to see chart and details statistics
+                    Choose a specific location to see chart and detailed statistics.
                     """)
                     
+                    # Select box with only the specific locations (no "All Locations" option)
                     selected_address = st.selectbox(
                         "Choose a location by address:",
-                        location_options,
-                        index=location_options.index(st.session_state.selected_address) if st.session_state.selected_address in location_options else 0,
+                        location_addresses,
+                        index=location_addresses.index(st.session_state.selected_address) if st.session_state.selected_address in location_addresses else 0,
                         key="address_select"
                     )
                     
                     # Update session state
                     st.session_state.selected_address = selected_address
                     
-                    # Display sentiment distribution for the selected location
-                    if selected_address == "All Locations":
-                        st.write("Showing sentiment distribution charts for all locations:")
-                        # When "All Locations" is selected, iterate through each location and display charts
-                        for i, bid in enumerate(unique_business_ids):
-                            address = id_to_address.get(bid, "Unknown Address")
-                            location_data = selected_business_data[selected_business_data['business_id'] == bid]
-                            if len(location_data) > 0:
-                                st.write(f"#### Location: {address}")
-                                fig, ax = plt.subplots()
-                                sns.histplot(location_data['sentiment'], bins=20, kde=True, ax=ax)
-                                ax.set_title(f"Sentiment Distribution for {selected_business} ({address})")
-                                ax.set_xlabel("Sentiment Score")
-                                ax.set_ylabel("Review Count")
-                                st.pyplot(fig)
-                    else:
-                        # When a specific address is selected, show only that location
-                        st.write(f"Showing detailed sentiment analysis for location: {selected_address}")
-                        # Find the business_id corresponding to the selected address
-                        address_to_id = {v: k for k, v in id_to_address.items()}
-                        selected_bid = address_to_id.get(selected_address)
-                        
-                        if selected_bid:
-                            location_data = selected_business_data[selected_business_data['business_id'] == selected_bid]
-                            if len(location_data) > 0:
-                                # Add location-specific stats
-                                positive_count = (location_data['sentiment'] > 0).sum()
-                                negative_count = (location_data['sentiment'] < 0).sum()
-                                neutral_count = (location_data['sentiment'] == 0).sum()
-                                avg_sentiment = location_data['sentiment'].mean()
-                                
-                                st.write(f"""
-                                **Location Statistics:**
-                                - Positive reviews: {positive_count} ({positive_count/len(location_data)*100:.1f}%)
-                                - Negative reviews: {negative_count} ({negative_count/len(location_data)*100:.1f}%)
-                                - Neutral reviews: {neutral_count} ({neutral_count/len(location_data)*100:.1f}%)
-                                - Average sentiment: {avg_sentiment:.2f}
-                                - Total reviews: {len(location_data)}
-                                """)
-                                
-                                fig, ax = plt.subplots()
-                                sns.histplot(location_data['sentiment'], bins=20, kde=True, ax=ax)
-                                ax.set_title(f"Sentiment Distribution for {selected_business} ({selected_address})")
-                                ax.set_xlabel("Sentiment Score")
-                                ax.set_ylabel("Review Count")
-                                st.pyplot(fig)
+                    # When a specific address is selected, show only that location
+                    st.write(f"Showing detailed sentiment analysis for location: {selected_address}")
+                    # Find the business_id corresponding to the selected address
+                    address_to_id = {v: k for k, v in id_to_address.items()}
+                    selected_bid = address_to_id.get(selected_address)
+                    
+                    if selected_bid:
+                        location_data = selected_business_data[selected_business_data['business_id'] == selected_bid]
+                        if len(location_data) > 0:
+                            # Add location-specific stats
+                            positive_count = (location_data['sentiment'] > 0).sum()
+                            negative_count = (location_data['sentiment'] < 0).sum()
+                            neutral_count = (location_data['sentiment'] == 0).sum()
+                            avg_sentiment = location_data['sentiment'].mean()
+                            
+                            st.write(f"""
+                            **Location Statistics:**
+                            - Positive reviews: {positive_count} ({positive_count/len(location_data)*100:.1f}%)
+                            - Negative reviews: {negative_count} ({negative_count/len(location_data)*100:.1f}%)
+                            - Neutral reviews: {neutral_count} ({neutral_count/len(location_data)*100:.1f}%)
+                            - Average sentiment: {avg_sentiment:.2f}
+                            - Total reviews: {len(location_data)}
+                            """)
+                            
+                            fig, ax = plt.subplots()
+                            sns.histplot(location_data['sentiment'], bins=20, kde=True, ax=ax)
+                            ax.set_title(f"Sentiment Distribution for {selected_business} ({selected_address})")
+                            ax.set_xlabel("Sentiment Score")
+                            ax.set_ylabel("Review Count")
+                            st.pyplot(fig)
             else:
                 st.warning("No businesses with multiple franchisees found. Try broadening your search criteria.")
         else:
@@ -314,7 +296,7 @@ st.write("""
 1. Select a city and business category (and optionally a specific business name)
 2. Review the map showing all matching businesses
 3. Select a specific business with multiple locations from the dropdown
-4. Analyze sentiment across all locations or drill down into a specific location
+4. Analyze sentiment for a specific location
 
 **Understanding sentiment scores:**
 - Scores range from -1.0 (very negative) to 1.0 (very positive)
