@@ -9,6 +9,8 @@ from folium.plugins import MarkerCluster
 import gdown
 import os
 
+st.set_page_config(page_title="Franchisee Tracker", page_icon=":tada:", layout="wide")
+
 # Initialize session state variables if they don't exist
 if 'city' not in st.session_state:
     st.session_state.city = None
@@ -63,13 +65,20 @@ def on_submit():
 
 # Streamlit UI components
 st.title("Florida Franchisee Tracker")
+st.write("""
+This app helps you analyze customer sentiment across different franchisee locations in Florida.
+
+According to the guidantfinancial.com, the top four trending states that small businesses going franchise are Texas, California, Florida, and Georgia. Therefore, We choose Florida to analyze customers' feedback on thoes franchisees.
+""")
+
+# Display the image using the URL
+image_url = "https://assets.guidantfinancial.com/public/2024/05/Guidant_SBT_Infographic_2024_03-FRANCHISES-_Franchises-2024.png"
+st.image(image_url, caption="2024 Small Business Franchise Trends - Guidant")
 
 st.markdown("📌 **Data Source:** [Yelp Open Dataset](https://www.yelp.com/dataset)")
 st.caption("The Yelp Open Dataset is a subset of Yelp data that is intended for educational use. It provides real-world data related to businesses including reviews, photos, check-ins, and attributes like hours, parking availability, and ambience.")
 
 st.write("""
-This app helps you analyze customer sentiment across different franchisee locations in Florida. 
-
 Start by selecting a city and business category below.
 """)
 
