@@ -41,6 +41,7 @@ if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
         # You might want to add a fallback here
 else:
     print(f"File download failed or file is empty")
+
                     
 # Filter data based on city and category
 def filter_data(city, category, business_name=None):
