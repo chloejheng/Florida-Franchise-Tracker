@@ -41,10 +41,6 @@ if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
         # You might want to add a fallback here
 else:
     print(f"File download failed or file is empty")
-# Add this right after loading the DataFrame
-if 'df' in locals():
-    st.write("DataFrame columns:", df.columns.tolist())
-    st.write("DataFrame shape:", df.shape)
                     
 # Filter data based on city and category
 def filter_data(city, category, business_name=None):
